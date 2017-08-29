@@ -80,21 +80,21 @@ type Int64 int64
 //   enum CryptoKeyType
 //    {
 //        KEY_TYPE_ED25519 = 0,
-//        KEY_TYPE_HASH_TX = 1,
+//        KEY_TYPE_PRE_AUTH_TX = 1,
 //        KEY_TYPE_HASH_X = 2
 //    };
 //
 type CryptoKeyType int32
 
 const (
-	CryptoKeyTypeKeyTypeEd25519 CryptoKeyType = 0
-	CryptoKeyTypeKeyTypeHashTx  CryptoKeyType = 1
-	CryptoKeyTypeKeyTypeHashX   CryptoKeyType = 2
+	CryptoKeyTypeKeyTypeEd25519   CryptoKeyType = 0
+	CryptoKeyTypeKeyTypePreAuthTx CryptoKeyType = 1
+	CryptoKeyTypeKeyTypeHashX     CryptoKeyType = 2
 )
 
 var cryptoKeyTypeMap = map[int32]string{
 	0: "CryptoKeyTypeKeyTypeEd25519",
-	1: "CryptoKeyTypeKeyTypeHashTx",
+	1: "CryptoKeyTypeKeyTypePreAuthTx",
 	2: "CryptoKeyTypeKeyTypeHashX",
 }
 
@@ -146,21 +146,21 @@ func (e PublicKeyType) String() string {
 //   enum SignerKeyType
 //    {
 //        SIGNER_KEY_TYPE_ED25519 = KEY_TYPE_ED25519,
-//        SIGNER_KEY_TYPE_HASH_TX = KEY_TYPE_HASH_TX,
+//        SIGNER_KEY_TYPE_PRE_AUTH_TX = KEY_TYPE_PRE_AUTH_TX,
 //        SIGNER_KEY_TYPE_HASH_X = KEY_TYPE_HASH_X
 //    };
 //
 type SignerKeyType int32
 
 const (
-	SignerKeyTypeSignerKeyTypeEd25519 SignerKeyType = 0
-	SignerKeyTypeSignerKeyTypeHashTx  SignerKeyType = 1
-	SignerKeyTypeSignerKeyTypeHashX   SignerKeyType = 2
+	SignerKeyTypeSignerKeyTypeEd25519   SignerKeyType = 0
+	SignerKeyTypeSignerKeyTypePreAuthTx SignerKeyType = 1
+	SignerKeyTypeSignerKeyTypeHashX     SignerKeyType = 2
 )
 
 var signerKeyTypeMap = map[int32]string{
 	0: "SignerKeyTypeSignerKeyTypeEd25519",
-	1: "SignerKeyTypeSignerKeyTypeHashTx",
+	1: "SignerKeyTypeSignerKeyTypePreAuthTx",
 	2: "SignerKeyTypeSignerKeyTypeHashX",
 }
 
@@ -252,19 +252,19 @@ func (u PublicKey) GetEd25519() (result Uint256, ok bool) {
 //    {
 //    case SIGNER_KEY_TYPE_ED25519:
 //        uint256 ed25519;
-//    case SIGNER_KEY_TYPE_HASH_TX:
+//    case SIGNER_KEY_TYPE_PRE_AUTH_TX:
 //        /* Hash of Transaction structure */
-//        uint256 hashTx;
+//        uint256 preAuthTx;
 //    case SIGNER_KEY_TYPE_HASH_X:
 //        /* Hash of random 256 bit preimage X */
 //        uint256 hashX;
 //    };
 //
 type SignerKey struct {
-	Type    SignerKeyType
-	Ed25519 *Uint256
-	HashTx  *Uint256
-	HashX   *Uint256
+	Type      SignerKeyType
+	Ed25519   *Uint256
+	PreAuthTx *Uint256
+	HashX     *Uint256
 }
 
 // SwitchFieldName returns the field name in which this union's
@@ -279,8 +279,8 @@ func (u SignerKey) ArmForSwitch(sw int32) (string, bool) {
 	switch SignerKeyType(sw) {
 	case SignerKeyTypeSignerKeyTypeEd25519:
 		return "Ed25519", true
-	case SignerKeyTypeSignerKeyTypeHashTx:
-		return "HashTx", true
+	case SignerKeyTypeSignerKeyTypePreAuthTx:
+		return "PreAuthTx", true
 	case SignerKeyTypeSignerKeyTypeHashX:
 		return "HashX", true
 	}
@@ -298,13 +298,13 @@ func NewSignerKey(aType SignerKeyType, value interface{}) (result SignerKey, err
 			return
 		}
 		result.Ed25519 = &tv
-	case SignerKeyTypeSignerKeyTypeHashTx:
+	case SignerKeyTypeSignerKeyTypePreAuthTx:
 		tv, ok := value.(Uint256)
 		if !ok {
 			err = fmt.Errorf("invalid value, must be Uint256")
 			return
 		}
-		result.HashTx = &tv
+		result.PreAuthTx = &tv
 	case SignerKeyTypeSignerKeyTypeHashX:
 		tv, ok := value.(Uint256)
 		if !ok {
@@ -341,25 +341,25 @@ func (u SignerKey) GetEd25519() (result Uint256, ok bool) {
 	return
 }
 
-// MustHashTx retrieves the HashTx value from the union,
+// MustPreAuthTx retrieves the PreAuthTx value from the union,
 // panicing if the value is not set.
-func (u SignerKey) MustHashTx() Uint256 {
-	val, ok := u.GetHashTx()
+func (u SignerKey) MustPreAuthTx() Uint256 {
+	val, ok := u.GetPreAuthTx()
 
 	if !ok {
-		panic("arm HashTx is not set")
+		panic("arm PreAuthTx is not set")
 	}
 
 	return val
 }
 
-// GetHashTx retrieves the HashTx value from the union,
+// GetPreAuthTx retrieves the PreAuthTx value from the union,
 // returning ok if the union's switch indicated the value is valid.
-func (u SignerKey) GetHashTx() (result Uint256, ok bool) {
+func (u SignerKey) GetPreAuthTx() (result Uint256, ok bool) {
 	armName, _ := u.ArmForSwitch(int32(u.Type))
 
-	if armName == "HashTx" {
-		result = *u.HashTx
+	if armName == "PreAuthTx" {
+		result = *u.PreAuthTx
 		ok = true
 	}
 
@@ -826,7 +826,8 @@ func (e ThresholdIndexes) String() string {
 //        ACCOUNT = 0,
 //        TRUSTLINE = 1,
 //        OFFER = 2,
-//        DATA = 3
+//        DATA = 3,
+//    	DEBIT = 4
 //    };
 //
 type LedgerEntryType int32
@@ -836,6 +837,7 @@ const (
 	LedgerEntryTypeTrustline LedgerEntryType = 1
 	LedgerEntryTypeOffer     LedgerEntryType = 2
 	LedgerEntryTypeData      LedgerEntryType = 3
+	LedgerEntryTypeDebit     LedgerEntryType = 4
 )
 
 var ledgerEntryTypeMap = map[int32]string{
@@ -843,6 +845,7 @@ var ledgerEntryTypeMap = map[int32]string{
 	1: "LedgerEntryTypeTrustline",
 	2: "LedgerEntryTypeOffer",
 	3: "LedgerEntryTypeData",
+	4: "LedgerEntryTypeDebit",
 }
 
 // ValidEnum validates a proposed value for this enum.  Implements
@@ -1262,6 +1265,68 @@ type DataEntry struct {
 	Ext       DataEntryExt
 }
 
+// DebitEntryExt is an XDR NestedUnion defines as:
+//
+//   union switch (int v)
+//        {
+//        case 0:
+//            void;
+//        }
+//
+type DebitEntryExt struct {
+	V int32
+}
+
+// SwitchFieldName returns the field name in which this union's
+// discriminant is stored
+func (u DebitEntryExt) SwitchFieldName() string {
+	return "V"
+}
+
+// ArmForSwitch returns which field name should be used for storing
+// the value for an instance of DebitEntryExt
+func (u DebitEntryExt) ArmForSwitch(sw int32) (string, bool) {
+	switch int32(sw) {
+	case 0:
+		return "", true
+	}
+	return "-", false
+}
+
+// NewDebitEntryExt creates a new  DebitEntryExt.
+func NewDebitEntryExt(v int32, value interface{}) (result DebitEntryExt, err error) {
+	result.V = v
+	switch int32(v) {
+	case 0:
+		// void
+	}
+	return
+}
+
+// DebitEntry is an XDR Struct defines as:
+//
+//   struct DebitEntry
+//    {
+//        AccountID owner; // account this debit belongs to
+//    	AccountID debitor; // account that use this debit
+//        Asset asset;         // type of asset (with issuer)
+//
+//        // reserved for future use
+//        union switch (int v)
+//        {
+//        case 0:
+//            void;
+//        }
+//        ext;
+//    };
+//
+type DebitEntry struct {
+	Owner   AccountId
+	Debitor AccountId
+	Asset   Asset
+	Ext     DebitEntryExt
+}
+
 // LedgerEntryData is an XDR NestedUnion defines as:
 //
 //   union switch (LedgerEntryType type)
@@ -1274,6 +1339,8 @@ type DataEntry struct {
 //            OfferEntry offer;
 //        case DATA:
 //            DataEntry data;
+//    	case DEBIT:
+//    		DebitEntry debit;
 //        }
 //
 type LedgerEntryData struct {
@@ -1282,6 +1349,7 @@ type LedgerEntryData struct {
 	TrustLine *TrustLineEntry
 	Offer     *OfferEntry
 	Data      *DataEntry
+	Debit     *DebitEntry
 }
 
 // SwitchFieldName returns the field name in which this union's
@@ -1302,6 +1370,8 @@ func (u LedgerEntryData) ArmForSwitch(sw int32) (string, bool) {
 		return "Offer", true
 	case LedgerEntryTypeData:
 		return "Data", true
+	case LedgerEntryTypeDebit:
+		return "Debit", true
 	}
 	return "-", false
 }
@@ -1338,6 +1408,13 @@ func NewLedgerEntryData(aType LedgerEntryType, value interface{}) (result Ledger
 			return
 		}
 		result.Data = &tv
+	case LedgerEntryTypeDebit:
+		tv, ok := value.(DebitEntry)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be DebitEntry")
+			return
+		}
+		result.Debit = &tv
 	}
 	return
 }
@@ -1442,6 +1519,31 @@ func (u LedgerEntryData) GetData() (result DataEntry, ok bool) {
 	return
 }
 
+// MustDebit retrieves the Debit value from the union,
+// panicing if the value is not set.
+func (u LedgerEntryData) MustDebit() DebitEntry {
+	val, ok := u.GetDebit()
+
+	if !ok {
+		panic("arm Debit is not set")
+	}
+
+	return val
+}
+
+// GetDebit retrieves the Debit value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u LedgerEntryData) GetDebit() (result DebitEntry, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "Debit" {
+		result = *u.Debit
+		ok = true
+	}
+
+	return
+}
+
 // LedgerEntryExt is an XDR NestedUnion defines as:
 //
 //   union switch (int v)
@@ -1496,6 +1598,8 @@ func NewLedgerEntryExt(v int32, value interface{}) (result LedgerEntryExt, err e
 //            OfferEntry offer;
 //        case DATA:
 //            DataEntry data;
+//    	case DEBIT:
+//    		DebitEntry debit;
 //        }
 //        data;
 //
@@ -1577,7 +1681,9 @@ type DecoratedSignature struct {
 //        ALLOW_TRUST = 7,
 //        ACCOUNT_MERGE = 8,
 //        INFLATION = 9,
-//        MANAGE_DATA = 10
+//        MANAGE_DATA = 10,
+//    	MANAGE_DEBIT = 11,
+//    	DIRECT_DEBIT = 12
 //    };
 //
 type OperationType int32
@@ -1594,6 +1700,8 @@ const (
 	OperationTypeAccountMerge       OperationType = 8
 	OperationTypeInflation          OperationType = 9
 	OperationTypeManageData         OperationType = 10
+	OperationTypeManageDebit        OperationType = 11
+	OperationTypeDirectDebit        OperationType = 12
 )
 
 var operationTypeMap = map[int32]string{
@@ -1608,6 +1716,8 @@ var operationTypeMap = map[int32]string{
 	8:  "OperationTypeAccountMerge",
 	9:  "OperationTypeInflation",
 	10: "OperationTypeManageData",
+	11: "OperationTypeManageDebit",
+	12: "OperationTypeDirectDebit",
 }
 
 // ValidEnum validates a proposed value for this enum.  Implements
@@ -1913,6 +2023,35 @@ type ManageDataOp struct {
 	DataValue *DataValue
 }
 
+// ManageDebitOp is an XDR Struct defines as:
+//
+//   struct ManageDebitOp
+//    {
+//    	AccountID debitor; // the account which will use this debit
+//        Asset asset;
+//
+//    	bool toDelete; // if true, delete the debit
+//    };
+//
+type ManageDebitOp struct {
+	Debitor  AccountId
+	Asset    Asset
+	ToDelete bool
+}
+
+// DirectDebitOp is an XDR Struct defines as:
+//
+//   struct DirectDebitOp
+//    {
+//    	AccountID owner; // owner of the debit
+//    	PaymentOp payWithDebit; // operation for pay using debit
+//    };
+//
+type DirectDebitOp struct {
+	Owner        AccountId
+	PayWithDebit PaymentOp
+}
+
 // OperationBody is an XDR NestedUnion defines as:
 //
 //   union switch (OperationType type)
@@ -1939,6 +2078,10 @@ type ManageDataOp struct {
 //            void;
 //        case MANAGE_DATA:
 //            ManageDataOp manageDataOp;
+//    	case MANAGE_DEBIT:
+//    		ManageDebitOp manageDebitOp;
+//    	case DIRECT_DEBIT:
+//    		DirectDebitOp directDebitOp;
 //        }
 //
 type OperationBody struct {
@@ -1953,6 +2096,8 @@ type OperationBody struct {
 	AllowTrustOp         *AllowTrustOp
 	Destination          *AccountId
 	ManageDataOp         *ManageDataOp
+	ManageDebitOp        *ManageDebitOp
+	DirectDebitOp        *DirectDebitOp
 }
 
 // SwitchFieldName returns the field name in which this union's
@@ -1987,6 +2132,10 @@ func (u OperationBody) ArmForSwitch(sw int32) (string, bool) {
 		return "", true
 	case OperationTypeManageData:
 		return "ManageDataOp", true
+	case OperationTypeManageDebit:
+		return "ManageDebitOp", true
+	case OperationTypeDirectDebit:
+		return "DirectDebitOp", true
 	}
 	return "-", false
 }
@@ -2067,6 +2216,20 @@ func NewOperationBody(aType OperationType, value interface{}) (result OperationB
 			return
 		}
 		result.ManageDataOp = &tv
+	case OperationTypeManageDebit:
+		tv, ok := value.(ManageDebitOp)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be ManageDebitOp")
+			return
+		}
+		result.ManageDebitOp = &tv
+	case OperationTypeDirectDebit:
+		tv, ok := value.(DirectDebitOp)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be DirectDebitOp")
+			return
+		}
+		result.DirectDebitOp = &tv
 	}
 	return
 }
@@ -2321,6 +2484,56 @@ func (u OperationBody) GetManageDataOp() (result ManageDataOp, ok bool) {
 	return
 }
 
+// MustManageDebitOp retrieves the ManageDebitOp value from the union,
+// panicing if the value is not set.
+func (u OperationBody) MustManageDebitOp() ManageDebitOp {
+	val, ok := u.GetManageDebitOp()
+
+	if !ok {
+		panic("arm ManageDebitOp is not set")
+	}
+
+	return val
+}
+
+// GetManageDebitOp retrieves the ManageDebitOp value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u OperationBody) GetManageDebitOp() (result ManageDebitOp, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "ManageDebitOp" {
+		result = *u.ManageDebitOp
+		ok = true
+	}
+
+	return
+}
+
+// MustDirectDebitOp retrieves the DirectDebitOp value from the union,
+// panicing if the value is not set.
+func (u OperationBody) MustDirectDebitOp() DirectDebitOp {
+	val, ok := u.GetDirectDebitOp()
+
+	if !ok {
+		panic("arm DirectDebitOp is not set")
+	}
+
+	return val
+}
+
+// GetDirectDebitOp retrieves the DirectDebitOp value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u OperationBody) GetDirectDebitOp() (result DirectDebitOp, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "DirectDebitOp" {
+		result = *u.DirectDebitOp
+		ok = true
+	}
+
+	return
+}
+
 // Operation is an XDR Struct defines as:
 //
 //   struct Operation
@@ -2354,6 +2567,10 @@ func (u OperationBody) GetManageDataOp() (result ManageDataOp, ok bool) {
 //            void;
 //        case MANAGE_DATA:
 //            ManageDataOp manageDataOp;
+//    	case MANAGE_DEBIT:
+//    		ManageDebitOp manageDebitOp;
+//    	case DIRECT_DEBIT:
+//    		DirectDebitOp directDebitOp;
 //        }
 //        body;
 //    };
@@ -4114,6 +4331,210 @@ func NewManageDataResult(code ManageDataResultCode, value interface{}) (result M
 	return
 }
 
+// ManageDebitResultCode is an XDR Enum defines as:
+//
+//   enum ManageDebitResultCode
+//    {
+//        // codes considered as "success" for the operation
+//        MANAGE_DEBIT_SUCCESS = 0,
+//        // codes considered as "failure" for the operation
+//        MANAGE_DEBIT_MALFORMED = -1,        // bad input
+//        MANAGE_DEBIT_NO_DEBITOR = -2,       // could not find debitor
+//        MANAGE_DEBIT_NO_TRUST = -3,         // no trustline for asset we're trying to debit
+//    	MANAGE_DEBIT_NOT_FOUND = -4,        // debit is not found
+//    	MANAGE_DEBIT_ALREADY_EXISTS = -5,   // debit already exists
+//    	MANAGE_DEBIT_LOW_RESERVE = -6       // not enough funds to create a new Debit Entry
+//    };
+//
+type ManageDebitResultCode int32
+
+const (
+	ManageDebitResultCodeManageDebitSuccess       ManageDebitResultCode = 0
+	ManageDebitResultCodeManageDebitMalformed     ManageDebitResultCode = -1
+	ManageDebitResultCodeManageDebitNoDebitor     ManageDebitResultCode = -2
+	ManageDebitResultCodeManageDebitNoTrust       ManageDebitResultCode = -3
+	ManageDebitResultCodeManageDebitNotFound      ManageDebitResultCode = -4
+	ManageDebitResultCodeManageDebitAlreadyExists ManageDebitResultCode = -5
+	ManageDebitResultCodeManageDebitLowReserve    ManageDebitResultCode = -6
+)
+
+var manageDebitResultCodeMap = map[int32]string{
+	0:  "ManageDebitResultCodeManageDebitSuccess",
+	-1: "ManageDebitResultCodeManageDebitMalformed",
+	-2: "ManageDebitResultCodeManageDebitNoDebitor",
+	-3: "ManageDebitResultCodeManageDebitNoTrust",
+	-4: "ManageDebitResultCodeManageDebitNotFound",
+	-5: "ManageDebitResultCodeManageDebitAlreadyExists",
+	-6: "ManageDebitResultCodeManageDebitLowReserve",
+}
+
+// ValidEnum validates a proposed value for this enum.  Implements
+// the Enum interface for ManageDebitResultCode
+func (e ManageDebitResultCode) ValidEnum(v int32) bool {
+	_, ok := manageDebitResultCodeMap[v]
+	return ok
+}
+
+// String returns the name of `e`
+func (e ManageDebitResultCode) String() string {
+	name, _ := manageDebitResultCodeMap[int32(e)]
+	return name
+}
+
+// ManageDebitResult is an XDR Union defines as:
+//
+//   union ManageDebitResult switch (ManageDebitResultCode code)
+//    {
+//    case MANAGE_DEBIT_SUCCESS:
+//        void;
+//    default:
+//        void;
+//    };
+//
+type ManageDebitResult struct {
+	Code ManageDebitResultCode
+}
+
+// SwitchFieldName returns the field name in which this union's
+// discriminant is stored
+func (u ManageDebitResult) SwitchFieldName() string {
+	return "Code"
+}
+
+// ArmForSwitch returns which field name should be used for storing
+// the value for an instance of ManageDebitResult
+func (u ManageDebitResult) ArmForSwitch(sw int32) (string, bool) {
+	switch ManageDebitResultCode(sw) {
+	case ManageDebitResultCodeManageDebitSuccess:
+		return "", true
+	default:
+		return "", true
+	}
+}
+
+// NewManageDebitResult creates a new  ManageDebitResult.
+func NewManageDebitResult(code ManageDebitResultCode, value interface{}) (result ManageDebitResult, err error) {
+	result.Code = code
+	switch ManageDebitResultCode(code) {
+	case ManageDebitResultCodeManageDebitSuccess:
+		// void
+	default:
+		// void
+	}
+	return
+}
+
+// DirectDebitResultCode is an XDR Enum defines as:
+//
+//   enum DirectDebitResultCode
+//    {
+//        // codes considered as "success" for the operation
+//        DIRECT_DEBIT_SUCCESS = 0,
+//        // codes considered as "failure" for the operation
+//        DIRECT_DEBIT_MALFORMED = -1,					// bad input
+//        DIRECT_DEBIT_NO_OWNER = -2,						// could not find owner of the debit
+//    	DIRECT_DEBIT_NO_DEBIT = -3,						// could not find debit for this account and owner
+//    	DIRECT_DEBIT_UNDERFUNDED = -4,					// not enough funds in debitor account
+//    	DIRECT_DEBIT_OWNER_UNDERFUNDED = -5,			// not enough funds in owner account
+//        DIRECT_DEBIT_OWNER_NO_TRUST = -6,				// no trust line on owner account
+//        DIRECT_DEBIT_OWNER_NOT_AUTHORIZED = -7,			// owner not authorized to transfer
+//        DIRECT_DEBIT_NO_DESTINATION = -8,				// destination account does not exist
+//        DIRECT_DEBIT_DESTINATION_NO_TRUST = -9,			// destination missing a trust line for asset
+//        DIRECT_DEBIT_DESTINATION_NOT_AUTHORIZED = -10,  // destination not authorized to hold asset
+//        DIRECT_DEBIT_LINE_FULL = -11,					// destination would go above their limit
+//        DIRECT_DEBIT_NO_ISSUER = -12					// missing issuer on asset
+//    };
+//
+type DirectDebitResultCode int32
+
+const (
+	DirectDebitResultCodeDirectDebitSuccess                  DirectDebitResultCode = 0
+	DirectDebitResultCodeDirectDebitMalformed                DirectDebitResultCode = -1
+	DirectDebitResultCodeDirectDebitNoOwner                  DirectDebitResultCode = -2
+	DirectDebitResultCodeDirectDebitNoDebit                  DirectDebitResultCode = -3
+	DirectDebitResultCodeDirectDebitUnderfunded              DirectDebitResultCode = -4
+	DirectDebitResultCodeDirectDebitOwnerUnderfunded         DirectDebitResultCode = -5
+	DirectDebitResultCodeDirectDebitOwnerNoTrust             DirectDebitResultCode = -6
+	DirectDebitResultCodeDirectDebitOwnerNotAuthorized       DirectDebitResultCode = -7
+	DirectDebitResultCodeDirectDebitNoDestination            DirectDebitResultCode = -8
+	DirectDebitResultCodeDirectDebitDestinationNoTrust       DirectDebitResultCode = -9
+	DirectDebitResultCodeDirectDebitDestinationNotAuthorized DirectDebitResultCode = -10
+	DirectDebitResultCodeDirectDebitLineFull                 DirectDebitResultCode = -11
+	DirectDebitResultCodeDirectDebitNoIssuer                 DirectDebitResultCode = -12
+)
+
+var directDebitResultCodeMap = map[int32]string{
+	0:   "DirectDebitResultCodeDirectDebitSuccess",
+	-1:  "DirectDebitResultCodeDirectDebitMalformed",
+	-2:  "DirectDebitResultCodeDirectDebitNoOwner",
+	-3:  "DirectDebitResultCodeDirectDebitNoDebit",
+	-4:  "DirectDebitResultCodeDirectDebitUnderfunded",
+	-5:  "DirectDebitResultCodeDirectDebitOwnerUnderfunded",
+	-6:  "DirectDebitResultCodeDirectDebitOwnerNoTrust",
+	-7:  "DirectDebitResultCodeDirectDebitOwnerNotAuthorized",
+	-8:  "DirectDebitResultCodeDirectDebitNoDestination",
+	-9:  "DirectDebitResultCodeDirectDebitDestinationNoTrust",
+	-10: "DirectDebitResultCodeDirectDebitDestinationNotAuthorized",
+	-11: "DirectDebitResultCodeDirectDebitLineFull",
+	-12: "DirectDebitResultCodeDirectDebitNoIssuer",
+}
+
+// ValidEnum validates a proposed value for this enum.  Implements
+// the Enum interface for DirectDebitResultCode
+func (e DirectDebitResultCode) ValidEnum(v int32) bool {
+	_, ok := directDebitResultCodeMap[v]
+	return ok
+}
+
+// String returns the name of `e`
+func (e DirectDebitResultCode) String() string {
+	name, _ := directDebitResultCodeMap[int32(e)]
+	return name
+}
+
+// DirectDebitResult is an XDR Union defines as:
+//
+//   union DirectDebitResult switch (DirectDebitResultCode code)
+//    {
+//    case DIRECT_DEBIT_SUCCESS:
+//        void;
+//    default:
+//        void;
+//    };
+//
+type DirectDebitResult struct {
+	Code DirectDebitResultCode
+}
+
+// SwitchFieldName returns the field name in which this union's
+// discriminant is stored
+func (u DirectDebitResult) SwitchFieldName() string {
+	return "Code"
+}
+
+// ArmForSwitch returns which field name should be used for storing
+// the value for an instance of DirectDebitResult
+func (u DirectDebitResult) ArmForSwitch(sw int32) (string, bool) {
+	switch DirectDebitResultCode(sw) {
+	case DirectDebitResultCodeDirectDebitSuccess:
+		return "", true
+	default:
+		return "", true
+	}
+}
+
+// NewDirectDebitResult creates a new  DirectDebitResult.
+func NewDirectDebitResult(code DirectDebitResultCode, value interface{}) (result DirectDebitResult, err error) {
+	result.Code = code
+	switch DirectDebitResultCode(code) {
+	case DirectDebitResultCodeDirectDebitSuccess:
+		// void
+	default:
+		// void
+	}
+	return
+}
+
 // OperationResultCode is an XDR Enum defines as:
 //
 //   enum OperationResultCode
@@ -4177,6 +4598,10 @@ func (e OperationResultCode) String() string {
 //            InflationResult inflationResult;
 //        case MANAGE_DATA:
 //            ManageDataResult manageDataResult;
+//    	case MANAGE_DEBIT:
+//    		ManageDebitResult manageDebitResult;
+//    	case DIRECT_DEBIT:
+//    		DirectDebitResult directDebitResult;
 //        }
 //
 type OperationResultTr struct {
@@ -4192,6 +4617,8 @@ type OperationResultTr struct {
 	AccountMergeResult       *AccountMergeResult
 	InflationResult          *InflationResult
 	ManageDataResult         *ManageDataResult
+	ManageDebitResult        *ManageDebitResult
+	DirectDebitResult        *DirectDebitResult
 }
 
 // SwitchFieldName returns the field name in which this union's
@@ -4226,6 +4653,10 @@ func (u OperationResultTr) ArmForSwitch(sw int32) (string, bool) {
 		return "InflationResult", true
 	case OperationTypeManageData:
 		return "ManageDataResult", true
+	case OperationTypeManageDebit:
+		return "ManageDebitResult", true
+	case OperationTypeDirectDebit:
+		return "DirectDebitResult", true
 	}
 	return "-", false
 }
@@ -4311,6 +4742,20 @@ func NewOperationResultTr(aType OperationType, value interface{}) (result Operat
 			return
 		}
 		result.ManageDataResult = &tv
+	case OperationTypeManageDebit:
+		tv, ok := value.(ManageDebitResult)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be ManageDebitResult")
+			return
+		}
+		result.ManageDebitResult = &tv
+	case OperationTypeDirectDebit:
+		tv, ok := value.(DirectDebitResult)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be DirectDebitResult")
+			return
+		}
+		result.DirectDebitResult = &tv
 	}
 	return
 }
@@ -4590,6 +5035,56 @@ func (u OperationResultTr) GetManageDataResult() (result ManageDataResult, ok bo
 	return
 }
 
+// MustManageDebitResult retrieves the ManageDebitResult value from the union,
+// panicing if the value is not set.
+func (u OperationResultTr) MustManageDebitResult() ManageDebitResult {
+	val, ok := u.GetManageDebitResult()
+
+	if !ok {
+		panic("arm ManageDebitResult is not set")
+	}
+
+	return val
+}
+
+// GetManageDebitResult retrieves the ManageDebitResult value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u OperationResultTr) GetManageDebitResult() (result ManageDebitResult, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "ManageDebitResult" {
+		result = *u.ManageDebitResult
+		ok = true
+	}
+
+	return
+}
+
+// MustDirectDebitResult retrieves the DirectDebitResult value from the union,
+// panicing if the value is not set.
+func (u OperationResultTr) MustDirectDebitResult() DirectDebitResult {
+	val, ok := u.GetDirectDebitResult()
+
+	if !ok {
+		panic("arm DirectDebitResult is not set")
+	}
+
+	return val
+}
+
+// GetDirectDebitResult retrieves the DirectDebitResult value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u OperationResultTr) GetDirectDebitResult() (result DirectDebitResult, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "DirectDebitResult" {
+		result = *u.DirectDebitResult
+		ok = true
+	}
+
+	return
+}
+
 // OperationResult is an XDR Union defines as:
 //
 //   union OperationResult switch (OperationResultCode code)
@@ -4619,6 +5114,10 @@ func (u OperationResultTr) GetManageDataResult() (result ManageDataResult, ok bo
 //            InflationResult inflationResult;
 //        case MANAGE_DATA:
 //            ManageDataResult manageDataResult;
+//    	case MANAGE_DEBIT:
+//    		ManageDebitResult manageDebitResult;
+//    	case DIRECT_DEBIT:
+//    		DirectDebitResult directDebitResult;
 //        }
 //        tr;
 //    default:
@@ -5312,6 +5811,21 @@ type LedgerKeyData struct {
 	DataName  String64
 }
 
+// LedgerKeyDebit is an XDR NestedStruct defines as:
+//
+//   struct
+//    	{
+//    		AccountID owner;
+//    		AccountID debitor;
+//    		Asset asset;
+//    	}
+//
+type LedgerKeyDebit struct {
+	Owner   AccountId
+	Debitor AccountId
+	Asset   Asset
+}
+
 // LedgerKey is an XDR Union defines as:
 //
 //   union LedgerKey switch (LedgerEntryType type)
@@ -5342,6 +5856,14 @@ type LedgerKeyData struct {
 //            AccountID accountID;
 //            string64 dataName;
 //        } data;
+//
+//    case DEBIT:
+//    	struct
+//    	{
+//    		AccountID owner;
+//    		AccountID debitor;
+//    		Asset asset;
+//    	} debit;
 //    };
 //
 type LedgerKey struct {
@@ -5350,6 +5872,7 @@ type LedgerKey struct {
 	TrustLine *LedgerKeyTrustLine
 	Offer     *LedgerKeyOffer
 	Data      *LedgerKeyData
+	Debit     *LedgerKeyDebit
 }
 
 // SwitchFieldName returns the field name in which this union's
@@ -5370,6 +5893,8 @@ func (u LedgerKey) ArmForSwitch(sw int32) (string, bool) {
 		return "Offer", true
 	case LedgerEntryTypeData:
 		return "Data", true
+	case LedgerEntryTypeDebit:
+		return "Debit", true
 	}
 	return "-", false
 }
@@ -5406,6 +5931,13 @@ func NewLedgerKey(aType LedgerEntryType, value interface{}) (result LedgerKey, e
 			return
 		}
 		result.Data = &tv
+	case LedgerEntryTypeDebit:
+		tv, ok := value.(LedgerKeyDebit)
+		if !ok {
+			err = fmt.Errorf("invalid value, must be LedgerKeyDebit")
+			return
+		}
+		result.Debit = &tv
 	}
 	return
 }
@@ -5504,6 +6036,31 @@ func (u LedgerKey) GetData() (result LedgerKeyData, ok bool) {
 
 	if armName == "Data" {
 		result = *u.Data
+		ok = true
+	}
+
+	return
+}
+
+// MustDebit retrieves the Debit value from the union,
+// panicing if the value is not set.
+func (u LedgerKey) MustDebit() LedgerKeyDebit {
+	val, ok := u.GetDebit()
+
+	if !ok {
+		panic("arm Debit is not set")
+	}
+
+	return val
+}
+
+// GetDebit retrieves the Debit value from the union,
+// returning ok if the union's switch indicated the value is valid.
+func (u LedgerKey) GetDebit() (result LedgerKeyDebit, ok bool) {
+	armName, _ := u.ArmForSwitch(int32(u.Type))
+
+	if armName == "Debit" {
+		result = *u.Debit
 		ok = true
 	}
 

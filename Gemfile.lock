@@ -49,6 +49,7 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw32
 
 DEPENDENCIES
   netrc
@@ -58,4 +59,4 @@ DEPENDENCIES
   xdrgen!
 
 BUNDLED WITH
-   1.13.7
+   1.15.4
