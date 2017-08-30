@@ -8,8 +8,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/asaskevich/govalidator"
-	"github.com/stellar/go/strkey"
-	"github.com/stellar/go/support/errors"
+	"github.com/TheLUGANSKIY/go/strkey"
+	"github.com/TheLUGANSKIY/go/support/errors"
 )
 
 // InvalidConfigError is the error that is returned when an invalid

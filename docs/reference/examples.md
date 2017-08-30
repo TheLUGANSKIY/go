@@ -15,8 +15,8 @@ package main
 import (
 	"fmt"
 
-	b "github.com/stellar/go/build"
-	"github.com/stellar/go/clients/horizon"
+	b "github.com/TheLUGANSKIY/go/build"
+	"github.com/TheLUGANSKIY/go/clients/horizon"
 )
 
 func main() {
@@ -56,7 +56,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/stellar/go/clients/horizon"
+	"github.com/TheLUGANSKIY/go/clients/horizon"
 )
 
 func main() {

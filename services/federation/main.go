@@ -9,13 +9,13 @@ import (
 
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
-	"github.com/stellar/go/handlers/federation"
-	"github.com/stellar/go/support/app"
-	"github.com/stellar/go/support/config"
-	"github.com/stellar/go/support/db"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/http"
-	"github.com/stellar/go/support/log"
+	"github.com/TheLUGANSKIY/go/handlers/federation"
+	"github.com/TheLUGANSKIY/go/support/app"
+	"github.com/TheLUGANSKIY/go/support/config"
+	"github.com/TheLUGANSKIY/go/support/db"
+	"github.com/TheLUGANSKIY/go/support/errors"
+	"github.com/TheLUGANSKIY/go/support/http"
+	"github.com/TheLUGANSKIY/go/support/log"
 )
 
 // Config represents the configuration of a federation server

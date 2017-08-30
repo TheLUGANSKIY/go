@@ -1,7 +1,7 @@
 # Stellar Go 
 [![Build Status](https://travis-ci.org/stellar/go.svg?branch=master)](https://travis-ci.org/stellar/go) 
-[![GoDoc](https://godoc.org/github.com/stellar/go?status.svg)](https://godoc.org/github.com/stellar/go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/stellar/go)](https://goreportcard.com/report/github.com/stellar/go)
+[![GoDoc](https://godoc.org/github.com/TheLUGANSKIY/go?status.svg)](https://godoc.org/github.com/TheLUGANSKIY/go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/TheLUGANSKIY/go)](https://goreportcard.com/report/github.com/TheLUGANSKIY/go)
 
 This repo is the home for all of the public go code produced by SDF.  In addition to various tools and services, this repository is the SDK from which you may develop your own applications that integrate with the stellar network.
 
@@ -30,7 +30,7 @@ Each of these directories have their own README file that explain further the na
 
 ### Other packages
 
-In addition to the packages described above, this repository contains various packages related to working with the Stellar network from a go program.  It's recommended that you use [godoc](https://godoc.org/github.com/stellar/go#pkg-subdirectories) to browse the documentation for each.
+In addition to the packages described above, this repository contains various packages related to working with the Stellar network from a go program.  It's recommended that you use [godoc](https://godoc.org/github.com/TheLUGANSKIY/go#pkg-subdirectories) to browse the documentation for each.
 
 
 ## Package source layout
